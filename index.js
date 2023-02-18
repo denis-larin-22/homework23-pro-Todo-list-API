@@ -12,6 +12,7 @@ class Note {
     }
 }
 
+
 class TodoApi {
     static baseUrl = 'https://todo.hillel.it';
 
@@ -31,75 +32,59 @@ class TodoApi {
     }
 
     static async postNote(objNote, token) {
-        const response = await fetch(`${this.baseUrl}/todo`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(objNote)
-        })
+        const response = await fetch(`${this.baseUrl}/todo`, this.requestParamWithObj('POST', token, objNote))
 
         return await response.json();
     }
 
     static async putNote(idNote, editedNote, token) {
-        return await fetch(`${this.baseUrl}/todo/${idNote}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(editedNote)
-        })
+        return await fetch(`${this.baseUrl}/todo/${idNote}`, this.requestParamWithObj('PUT', token, editedNote))
     }
 
     static async getNote(idNote, token) {
-        return fetch(`${this.baseUrl}/todo/${idNote}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Authorization': `Bearer ${token}`
-            },
-        }).then(res => res.json())
+        return fetch(`${this.baseUrl}/todo/${idNote}`, this.requestParam('GET', token)).then(res => res.json())
     }
 
     static async getList(token) {
-        const response = await fetch(`${this.baseUrl}/todo`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Authorization': `Bearer ${token}`
-            },
-        })
+        const response = await fetch(`${this.baseUrl}/todo`, this.requestParam('GET', token))
 
         return await response.json();
     }
 
     static async deleteNote(idNumb, token) {
-        fetch(`${this.baseUrl}/todo/${idNumb}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Authorization': `Bearer ${token}`
-            },
-        })
+        fetch(`${this.baseUrl}/todo/${idNumb}`, this.requestParam('DELETE', token))
     }
 
     static async putChecked(idNote, token) {
-        return await fetch(`${this.baseUrl}/todo/${idNote}/toggle`, {
-            method: 'PUT',
+        return await fetch(`${this.baseUrl}/todo/${idNote}/toggle`,this.requestParam('PUT', token))
+    }
+
+    static requestParamWithObj(method, token, obj) {
+        return {
+            method,
             headers: {
                 'Content-Type': 'application/json;charset=utf-8',
                 'Authorization': `Bearer ${token}`
             },
-        })
+            body: JSON.stringify(obj)
+        }
+    }
+
+    static requestParam(method, token) {
+        return {
+            method,
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8',
+                'Authorization': `Bearer ${token}`
+            },
+        }
     }
 }
 
+
 class ToDoList {
-    token = null || localStorage.getItem('token');
-    list = this.showList();
+    token = null ?? localStorage.getItem('token');
+    list = this.getList();
 
     async login(name, email) {
         const token = await TodoApi.login(name, email);
@@ -113,8 +98,6 @@ class ToDoList {
 
         const newNote = await TodoApi.postNote(note, this.token);
         this.list.push(newNote);
-
-        console.log(newNote);
     }
 
     async getNote(idNote) {
@@ -122,7 +105,7 @@ class ToDoList {
         console.log(note);
     }
 
-    async showList() {
+    async getList() {
         const list = await TodoApi.getList(this.token);
         this.list = list;
         console.log(this.list);
@@ -146,6 +129,5 @@ class ToDoList {
 
 const todo = new ToDoList;
 // todo.login('denis', 'dev');
-
 
 
